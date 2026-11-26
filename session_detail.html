@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Session #{{ session.session_id }}{% endblock %}
+{% block content %}
+<h1>Session #{{ session.session_id }} · {{ session.title }}</h1>
+<div class="actions">
+  <a class="button" href="{{ url_for('session_edit', session_id=session.session_id) }}">Edit</a>
+  <form class="inline" method="post" action="{{ url_for('session_delete', session_id=session.session_id) }}"
+        onsubmit="return confirm('Delete session #{{ session.session_id }}? Assigned papers will be unscheduled.');">
+    <button class="danger" type="submit">Delete</button>
+  </form>
+  <a class="button secondary" href="{{ url_for('sessions_list') }}">All sessions</a>
+</div>
+<div class="card">
+  <dl class="kv">
+    <dt>Conference</dt><dd>#{{ session.conference_id }} {{ session.acronym }} ({{ session.city }})</dd>
+    <dt>Date</dt><dd>{{ session.session_date }}</dd>
+    <dt>Time</dt><dd>{{ session.start_time|fmt }}–{{ session.end_time|fmt }}</dd>
+    <dt>Room</dt><dd>{{ session.room_label }}</dd>
+    <dt>Chair</dt><dd><a href="{{ url_for('user_detail', user_id=session.chair_id) }}">{{ session.chair_name }}</a></dd>
+  </dl>
+</div>
+
+<h2>Assigned papers</h2>
+<table>
+  <tr><th>Paper</th><th>Title</th><th>Track</th><th>Status</th><th></th></tr>
+  {% for p in papers %}
+  <tr><td><a href="{{ url_for('paper_detail', paper_id=p.paper_id) }}">#{{ p.paper_id }}</a></td><td>{{ p.title }}</td><td>{{ p.track_name }}</td><td>{{ p.status }}</td>
+      <td><form class="inline" method="post" action="{{ url_for('session_unassign', session_id=session.session_id, paper_id=p.paper_id) }}"><button class="secondary" type="submit">unassign</button></form></td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No papers are assigned to this session (empty session).</td></tr>{% endfor %}
+</table>
+
+<form method="post" action="{{ url_for('session_assign', session_id=session.session_id) }}" class="card">
+  <b>Assign a paper to this session</b>
+  <p class="hint">Every paper is listed so that invalid choices can be tried: the application accepts only accepted papers whose track belongs to {{ session.acronym }}. Choosing a paper that is in another session moves it.</p>
+  <div class="row-inputs" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <select name="paper_id" required style="max-width:760px;width:100%">
+      {% for p in candidates %}
+      <option value="{{ p.paper_id }}">#{{ p.paper_id }} [{{ p.acronym }}, {{ p.status }}{% if p.session_id %}, in session #{{ p.session_id }}{% endif %}] {{ p.title }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Assign</button>
+  </div>
+</form>
+{% endblock %}

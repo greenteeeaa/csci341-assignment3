@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Schedule{% endblock %}
+{% block content %}
+<h1>Accepted paper schedule <span class="hint">(SELECT * FROM accepted_paper_schedule ORDER BY conference_id, session_date, start_time, session_id, paper_id)</span></h1>
+<table>
+  <tr><th>Paper</th><th>Title</th><th>Conf.</th><th>Track</th><th>Session</th><th>Date</th><th>Time</th><th>Room</th><th>Chair</th><th>Corresponding author</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><a href="{{ url_for('paper_detail', paper_id=r.paper_id) }}">#{{ r.paper_id }}</a></td>
+    <td>{{ r.paper_title }}</td>
+    <td>#{{ r.conference_id }} {{ r.conference_acronym }}</td>
+    <td>{{ r.track_name }}</td>
+    <td><a href="{{ url_for('session_detail', session_id=r.session_id) }}">#{{ r.session_id }} {{ r.session_title }}</a></td>
+    <td>{{ r.session_date }}</td>
+    <td>{{ r.start_time|fmt }}–{{ r.end_time|fmt }}</td>
+    <td>{{ r.room_label }}</td>
+    <td>{{ r.chair_full_name }}</td>
+    <td>{{ r.corresponding_author_full_name|fmt }}<br><span class="hint">{{ r.corresponding_author_email|fmt }}</span></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="10" class="muted">No papers are scheduled.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

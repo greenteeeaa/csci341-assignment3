@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit session #%d'|format(session_id) if session_id else 'New session' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Edit session #%d'|format(session_id) if session_id else 'New session' }}</h1>
+<form method="post">
+  <label>Conference</label>
+  <select name="conference_id" required>
+    <option value="">— choose a conference —</option>
+    {% for c in conferences %}<option value="{{ c.conference_id }}" {% if form.get('conference_id') == c.conference_id|string %}selected{% endif %}>#{{ c.conference_id }} {{ c.acronym }} ({{ c.start_date }} to {{ c.end_date }})</option>{% endfor %}
+  </select>
+  <label>Title <input type="text" name="title" value="{{ form.get('title', '') }}" required maxlength="200"></label>
+  <label>Date <span class="hint">(within the conference dates)</span> <input type="date" name="session_date" value="{{ form.get('session_date', '') }}" required></label>
+  <label>Start time <input type="time" name="start_time" value="{{ form.get('start_time', '') }}" required></label>
+  <label>End time <span class="hint">(later than the start time)</span> <input type="time" name="end_time" value="{{ form.get('end_time', '') }}" required></label>
+  <label>Room <input type="text" name="room_label" value="{{ form.get('room_label', '') }}" required maxlength="100"></label>
+  <label>Chair <span class="hint">(must belong to the conference's reviewer pool)</span></label>
+  <select name="chair_id" required>
+    <option value="">— choose a reviewer —</option>
+    {% for r in reviewers %}<option value="{{ r.reviewer_id }}" {% if form.get('chair_id') == r.reviewer_id|string %}selected{% endif %}>{{ r.full_name }} (#{{ r.reviewer_id }}; pools: {{ r.pools }})</option>{% endfor %}
+  </select>
+  <div class="actions">
+    <button type="submit">Save</button>
+    <a class="button secondary" href="{{ url_for('session_detail', session_id=session_id) if session_id else url_for('sessions_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

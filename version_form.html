@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Edit version{% endblock %}
+{% block content %}
+<h1>Edit version {{ version.version_no }} of paper #{{ version.paper_id }}</h1>
+<p class="muted">{{ version.title }}</p>
+<form method="post">
+  <label>File location <input type="text" name="file_location" value="{{ form.get('file_location', '') }}" required maxlength="500"></label>
+  <label>Uploaded at <input type="datetime-local" name="uploaded_at" value="{{ form.get('uploaded_at', '') }}" required></label>
+  <label>Change note (optional) <input type="text" name="change_note" value="{{ form.get('change_note', '') }}"></label>
+  <div class="actions">
+    <button type="submit">Save</button>
+    <a class="button secondary" href="{{ url_for('paper_detail', paper_id=version.paper_id) }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}User #{{ user.user_id }}{% endblock %}
+{% block content %}
+<h1>User #{{ user.user_id }} · {{ user.given_name }} {{ user.surname }}</h1>
+<div class="actions">
+  <a class="button" href="{{ url_for('user_edit', user_id=user.user_id) }}">Edit</a>
+  <form class="inline" method="post" action="{{ url_for('user_delete', user_id=user.user_id) }}"
+        onsubmit="return confirm('Delete user #{{ user.user_id }}?');">
+    <button class="danger" type="submit">Delete</button>
+  </form>
+  <a class="button secondary" href="{{ url_for('users_list') }}">All users</a>
+</div>
+<div class="card">
+  <dl class="kv">
+    <dt>E-mail</dt><dd>{{ user.email }}</dd>
+    <dt>Affiliation</dt><dd>{{ user.affiliation }}</dd>
+    <dt>Country</dt><dd>{{ user.country }}</dd>
+    <dt>Phone number</dt><dd>{{ user.phone_number }}</dd>
+    <dt>Roles</dt><dd>{% if author %}<span class="tag">author</span>{% endif %}{% if reviewer %}<span class="tag">reviewer</span>{% endif %}</dd>
+  </dl>
+</div>
+{% if author %}
+<div class="card">
+  <h2 style="margin-top:0">Author profile</h2>
+  <dl class="kv">
+    <dt>ORCID</dt><dd>{{ author.orcid|fmt }}</dd>
+    <dt>Research areas</dt><dd>{% for a in areas %}<span class="tag">{{ a.area_label }}</span>{% endfor %}</dd>
+  </dl>
+  <h3>Papers</h3>
+  <table>
+    <tr><th>Paper</th><th>Title</th><th>Status</th><th>Position</th><th>Corresponding</th></tr>
+    {% for p in papers %}
+    <tr><td><a href="{{ url_for('paper_detail', paper_id=p.paper_id) }}">#{{ p.paper_id }}</a></td><td>{{ p.title }}</td>
+        <td><span class="tag status-{{ p.status|replace(' ', '-') }}">{{ p.status }}</span></td><td>{{ p.author_position }}</td><td>{{ p.is_corresponding|fmt }}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">No papers.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endif %}
+{% if reviewer %}
+<div class="card">
+  <h2 style="margin-top:0">Reviewer profile</h2>
+  <dl class="kv">
+    <dt>Years of experience</dt><dd>{{ reviewer.years_experience }}</dd>
+    <dt>Expertise areas</dt><dd>{% for e in expertise %}<span class="tag">{{ e.area_label }}</span>{% endfor %}</dd>
+    <dt>Reviewer pools</dt><dd>{% for c in pools %}<span class="tag">{{ c.acronym }}</span>{% else %}<span class="muted">none</span>{% endfor %}</dd>
+    <dt>Coordinates tracks</dt><dd>{% for t in tracks %}<span class="tag">#{{ t.track_id }} {{ t.name }}</span>{% else %}<span class="muted">none</span>{% endfor %}</dd>
+    <dt>Chairs sessions</dt><dd>{% for s in sessions %}<a class="tag" href="{{ url_for('session_detail', session_id=s.session_id) }}">#{{ s.session_id }} {{ s.title }}</a>{% else %}<span class="muted">none</span>{% endfor %}</dd>
+  </dl>
+  <h3>Reviews</h3>
+  <table>
+    <tr><th>Review</th><th>Paper</th><th>Score</th><th>Recommendation</th></tr>
+    {% for r in reviews %}
+    <tr><td><a href="{{ url_for('review_detail', review_id=r.review_id) }}">#{{ r.review_id }}</a></td>
+        <td><a href="{{ url_for('paper_detail', paper_id=r.paper_id) }}">#{{ r.paper_id }}</a> {{ r.title }}</td>
+        <td>{{ r.overall_score }}</td><td>{{ r.recommendation }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No reviews.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

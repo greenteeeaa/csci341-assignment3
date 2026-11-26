@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Research Conference and Paper Review Management System</h1>
+<p class="muted">CSCI 341 Assignment 3 · Flask + SQLAlchemy + PostgreSQL. Simple administrative interface (no login required).</p>
+
+<table style="max-width:700px">
+  <tr><th>Users</th><th>Papers</th><th>Versions</th><th>Reviews</th><th>Sessions</th><th>Conferences</th><th>Tracks</th></tr>
+  <tr><td>{{ counts.users }}</td><td>{{ counts.papers }}</td><td>{{ counts.versions }}</td><td>{{ counts.reviews }}</td>
+      <td>{{ counts.sessions }}</td><td>{{ counts.conferences }}</td><td>{{ counts.tracks }}</td></tr>
+</table>
+
+<div class="card">
+  <h2 style="margin-top:0">Manage</h2>
+  <ul>
+    <li><a href="{{ url_for('users_list') }}">Users</a>: create / view / edit / delete users and their author and reviewer profiles (ORCID, research areas, expertise, experience, reviewer pools).</li>
+    <li><a href="{{ url_for('papers_list') }}">Papers</a>: create / view / edit / delete papers with their authors (order, corresponding author), keywords, session and versions.</li>
+    <li><a href="{{ url_for('reviews_list') }}">Reviews</a>: create / view / edit / delete completed reviews.</li>
+    <li><a href="{{ url_for('sessions_list') }}">Sessions</a>: create / view / edit / delete sessions and assign accepted papers to them.</li>
+    <li><a href="{{ url_for('schedule') }}">Schedule</a>: output of the database view <code>accepted_paper_schedule</code>.</li>
+    <li><a href="{{ url_for('conferences') }}">Conferences &amp; tracks</a>: read-only seed data (hosts, tracks, reviewer pools, sessions).</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Demonstrating the two required application checks (seed data)</h2>
+  <ol>
+    <li><b>Self-review is rejected</b> &mdash; <a href="{{ url_for('review_create', paper_id=2) }}">add a review</a> for paper #2 with reviewer <i>Arman Armanov</i> (he is the first author of paper #2).
+        Also: <a href="{{ url_for('paper_edit', paper_id=1) }}">edit paper #1</a> and add <i>Arman Armanov</i> as an author (he already reviewed paper #1).</li>
+    <li><b>Invalid session assignment is rejected</b> &mdash; open <a href="{{ url_for('session_detail', session_id=1) }}">session #1 (CADS 2026)</a> and assign
+        paper #9 (status <i>submitted</i>) or paper #10 (accepted, but in ISMLS 2026). A valid assignment: paper #4 (accepted, CADS 2026, no session yet).
+        Also: <a href="{{ url_for('paper_edit', paper_id=1) }}">edit paper #1</a> (scheduled in session #1) and change its status to <i>rejected</i> or its track to an ISMLS 2026 track.</li>
+  </ol>
+</div>
+
+{% if ALLOW_RESET %}
+<div class="card">
+  <h2 style="margin-top:0">Maintenance</h2>
+  <form method="post" action="{{ url_for('admin_reset') }}" onsubmit="return confirm('Drop all data and reload the original seed data?');">
+    <button class="danger" type="submit">Restore seed data</button>
+    <span class="hint">Re-runs schema.sql, seed.sql and view.sql in one transaction.</span>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

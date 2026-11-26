@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Conferences{% endblock %}
+{% block content %}
+<h1>Conferences, tracks and reviewer pools <span class="hint">(read-only seed data)</span></h1>
+{% for c in confs %}
+<div class="card">
+  <h2 style="margin-top:0">#{{ c.conference_id }} · {{ c.acronym }} — {{ c.name }}</h2>
+  <dl class="kv">
+    <dt>Location</dt><dd>{{ c.city }}, {{ c.country }}</dd>
+    <dt>Dates</dt><dd>{{ c.start_date }} to {{ c.end_date }}</dd>
+    <dt>Submission deadline</dt><dd>{{ c.submission_deadline }}</dd>
+    <dt>Review deadline</dt><dd>{{ c.review_deadline }}</dd>
+    <dt>Description</dt><dd>{{ c.description }}</dd>
+    <dt>Host institutions</dt><dd>{% for h in hosts.get(c.conference_id, []) %}<span class="tag">{{ h.host_name }}</span>{% endfor %}</dd>
+    <dt>Reviewer pool</dt><dd>{% for r in pools.get(c.conference_id, []) %}<a class="tag" href="{{ url_for('user_detail', user_id=r.reviewer_id) }}">{{ r.full_name }} ({{ r.years_experience }} y)</a>{% else %}<span class="muted">none</span>{% endfor %}</dd>
+  </dl>
+  <h3>Tracks</h3>
+  <table>
+    <tr><th>ID</th><th>Name</th><th>Research area</th><th>Coordinator</th><th>Papers</th></tr>
+    {% for t in tracks.get(c.conference_id, []) %}
+    <tr><td>{{ t.track_id }}</td><td>{{ t.name }}</td><td>{{ t.research_area }}</td><td>{{ t.coordinator }}</td><td>{{ t.paper_count }}</td></tr>
+    {% endfor %}
+  </table>
+  <h3>Sessions</h3>
+  <table>
+    <tr><th>ID</th><th>Title</th><th>Date</th><th>Time</th><th>Papers</th></tr>
+    {% for s in sessions.get(c.conference_id, []) %}
+    <tr><td>{{ s.session_id }}</td><td><a href="{{ url_for('session_detail', session_id=s.session_id) }}">{{ s.title }}</a></td><td>{{ s.session_date }}</td><td>{{ s.start_time|fmt }}–{{ s.end_time|fmt }}</td><td>{{ s.paper_count }}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">No sessions.</td></tr>{% endfor %}
+  </table>
+</div>
+{% endfor %}
+{% endblock %}

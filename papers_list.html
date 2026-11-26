@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Papers{% endblock %}
+{% block content %}
+<h1>Papers</h1>
+<div class="actions">
+  <a class="button" href="{{ url_for('paper_create') }}">+ New paper</a>
+  <form class="inline" method="get">
+    <select name="status" onchange="this.form.submit()" style="width:auto">
+      <option value="">All statuses</option>
+      {% for s in PAPER_STATUSES %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <noscript><button type="submit">Filter</button></noscript>
+  </form>
+</div>
+<table>
+  <tr><th>ID</th><th>Title</th><th>Conference / track</th><th>Status</th><th>Session</th><th>Corresponding author</th><th>Current version</th><th>Reviews</th></tr>
+  {% for p in papers %}
+  <tr>
+    <td>{{ p.paper_id }}</td>
+    <td><a href="{{ url_for('paper_detail', paper_id=p.paper_id) }}">{{ p.title }}</a></td>
+    <td>{{ p.acronym }} · {{ p.track_name }}</td>
+    <td><span class="tag status-{{ p.status|replace(' ', '-') }}">{{ p.status }}</span></td>
+    <td>{% if p.session_id %}<a href="{{ url_for('session_detail', session_id=p.session_id) }}">#{{ p.session_id }} {{ p.session_title }}</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+    <td>{{ p.corresponding_author|fmt }}</td>
+    <td>v{{ p.current_version }}</td>
+    <td>{{ p.review_count }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="8" class="muted">No papers.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

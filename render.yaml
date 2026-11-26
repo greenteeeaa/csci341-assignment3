@@ -1,0 +1,19 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec)
+# Free web service; the PostgreSQL database is external (e.g. Neon free plan, which does not expire).
+# After creating the service, paste the database connection string into DATABASE_URL.
+services:
+  - type: web
+    name: csci341-conference-app
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # creates + seeds the schema only if the tables do not exist yet, then starts the app
+    startCommand: python init_db.py --if-empty && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.8

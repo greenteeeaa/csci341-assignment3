@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit paper #%d'|format(paper_id) if paper_id else 'New paper' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Edit paper #%d'|format(paper_id) if paper_id else 'New paper' }}</h1>
+<form method="post">
+  <fieldset>
+    <legend>Paper</legend>
+    <label>Track</label>
+    <select name="track_id" required>
+      <option value="">— choose a track —</option>
+      {% for t in tracks %}
+      <option value="{{ t.track_id }}" {% if form.get('track_id') == t.track_id|string %}selected{% endif %}>{{ t.acronym }} · #{{ t.track_id }} {{ t.name }}</option>
+      {% endfor %}
+    </select>
+    <label>Title <input type="text" name="title" value="{{ form.get('title', '') }}" required maxlength="300"></label>
+    <label>Abstract <textarea name="abstract" required>{{ form.get('abstract', '') }}</textarea></label>
+    <label>Submission date <input type="date" name="submission_date" value="{{ form.get('submission_date', '') }}" required></label>
+    <label>Status</label>
+    <select name="status">
+      {% for s in PAPER_STATUSES %}<option value="{{ s }}" {% if form.get('status') == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <label>Session <span class="hint">(only accepted papers; the session must belong to the track's conference)</span></label>
+    <select name="session_id">
+      <option value="">— not scheduled —</option>
+      {% for s in sessions %}
+      <option value="{{ s.session_id }}" {% if form.get('session_id') == s.session_id|string %}selected{% endif %}>{{ s.acronym }} · #{{ s.session_id }} {{ s.title }} ({{ s.session_date }} {{ s.start_time|fmt }})</option>
+      {% endfor %}
+    </select>
+    <label>Keywords <span class="hint">(one or more; one per line or comma-separated &mdash; stored as separate rows)</span>
+      <textarea name="keywords" required>{{ form.get('keywords', '') }}</textarea></label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Authors</legend>
+    <p class="hint">Fill one row per author (empty rows are ignored). Positions are positive and unique; choose exactly one corresponding author.</p>
+    <input type="hidden" name="author_rows" value="{{ rows|length }}">
+    <table>
+      <tr><th>#</th><th>Author</th><th>Position</th><th>Corresponding</th></tr>
+      {% for r in rows %}
+      {% set i = loop.index0 %}
+      <tr class="row-inputs">
+        <td>{{ loop.index }}</td>
+        <td><select name="author_id_{{ i }}">
+              <option value="">—</option>
+              {% for a in authors %}<option value="{{ a.author_id }}" {% if r.author_id|string == a.author_id|string %}selected{% endif %}>{{ a.full_name }} (#{{ a.author_id }}, {{ a.email }})</option>{% endfor %}
+            </select></td>
+        <td><input type="number" name="position_{{ i }}" min="1" value="{{ r.position }}" style="width:80px"></td>
+        <td><input type="radio" name="corresponding" value="{{ i }}" {% if r.corresponding %}checked{% endif %}></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </fieldset>
+
+  {% if not paper_id %}
+  <fieldset>
+    <legend>First version</legend>
+    <label>Version number <input type="number" name="version_no" min="1" value="{{ form.get('version_no', '1') }}" required></label>
+    <label>File location <input type="text" name="file_location" value="{{ form.get('file_location', '') }}" required maxlength="500" placeholder="/files/cads2026/paper-13/v1.pdf"></label>
+    <label>Uploaded at <input type="datetime-local" name="uploaded_at" value="{{ form.get('uploaded_at', '') }}" required></label>
+    <label>Change note (optional) <input type="text" name="change_note" value="{{ form.get('change_note', '') }}"></label>
+  </fieldset>
+  {% else %}
+  <p class="hint">Versions are added, edited and deleted on the paper's page.</p>
+  {% endif %}
+
+  <div class="actions">
+    <button type="submit">Save</button>
+    <a class="button secondary" href="{{ url_for('paper_detail', paper_id=paper_id) if paper_id else url_for('papers_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

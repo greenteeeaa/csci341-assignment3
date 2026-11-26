@@ -1,0 +1,11 @@
+CSCI 341 Assignment 3 - links
+
+Video presentation (Google Drive, shared as "Anyone with the link can view"):
+[paste Google Drive link here]
+
+Deployed web application:
+[paste application URL here, e.g. https://csci341-conference-app.onrender.com]
+Note: the app is on a free plan and may take up to ~1 minute to wake up on the first request.
+
+Demo account credentials:
+None required - the application has no login (authentication is not required by the assignment).

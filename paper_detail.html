@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Paper #{{ paper.paper_id }}{% endblock %}
+{% block content %}
+<h1>Paper #{{ paper.paper_id }} · {{ paper.title }}</h1>
+<div class="actions">
+  <a class="button" href="{{ url_for('paper_edit', paper_id=paper.paper_id) }}">Edit paper, authors, keywords, session</a>
+  <a class="button secondary" href="{{ url_for('review_create', paper_id=paper.paper_id) }}">+ Add review</a>
+  <form class="inline" method="post" action="{{ url_for('paper_delete', paper_id=paper.paper_id) }}"
+        onsubmit="return confirm('Delete paper #{{ paper.paper_id }} together with its authorship, keywords, versions and reviews?');">
+    <button class="danger" type="submit">Delete paper</button>
+  </form>
+</div>
+<div class="card">
+  <dl class="kv">
+    <dt>Status</dt><dd><span class="tag status-{{ paper.status|replace(' ', '-') }}">{{ paper.status }}</span></dd>
+    <dt>Conference</dt><dd>#{{ paper.conference_id }} {{ paper.acronym }}</dd>
+    <dt>Track</dt><dd>#{{ paper.track_id }} {{ paper.track_name }}</dd>
+    <dt>Submission date</dt><dd>{{ paper.submission_date }}</dd>
+    <dt>Session</dt><dd>{% if paper.session_id %}<a href="{{ url_for('session_detail', session_id=paper.session_id) }}">#{{ paper.session_id }} {{ paper.session_title }}</a>
+        ({{ paper.session_date }}, {{ paper.start_time|fmt }}–{{ paper.end_time|fmt }}, {{ paper.room_label }}){% else %}<span class="muted">not assigned</span>{% endif %}</dd>
+    <dt>Keywords</dt><dd>{% for k in keywords %}<span class="tag">{{ k.keyword }}</span>{% endfor %}</dd>
+    <dt>Abstract</dt><dd>{{ paper.abstract }}</dd>
+  </dl>
+</div>
+
+<h2>Authors</h2>
+<table>
+  <tr><th>Position</th><th>Author</th><th>E-mail</th><th>Corresponding</th></tr>
+  {% for a in authors %}
+  <tr><td>{{ a.author_position }}</td><td><a href="{{ url_for('user_detail', user_id=a.author_id) }}">{{ a.full_name }}</a> (#{{ a.author_id }})</td>
+      <td>{{ a.email }}</td><td>{{ 'yes' if a.is_corresponding else '' }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Versions <span class="hint">(highest number = current version; gaps are allowed)</span></h2>
+<table>
+  <tr><th>Version</th><th>File location</th><th>Uploaded at</th><th>Change note</th><th></th></tr>
+  {% for v in versions %}
+  <tr>
+    <td>v{{ v.version_no }}{% if loop.first %} <span class="tag">current</span>{% endif %}</td>
+    <td>{{ v.file_location }}</td><td>{{ v.uploaded_at|fmt }}</td><td>{{ v.change_note|fmt }}</td>
+    <td>
+      <a href="{{ url_for('version_edit', paper_id=paper.paper_id, version_no=v.version_no) }}">edit</a>
+      <form class="inline" method="post" action="{{ url_for('version_delete', paper_id=paper.paper_id, version_no=v.version_no) }}"
+            onsubmit="return confirm('Delete version {{ v.version_no }}?');">
+        <button class="secondary" type="submit">delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<form method="post" action="{{ url_for('version_create', paper_id=paper.paper_id) }}" class="card">
+  <b>Add a version</b>
+  <div class="row-inputs" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+    <label>Version no. <input type="number" name="version_no" min="1" value="{{ next_version }}" required style="width:90px"></label>
+    <label style="flex:1">File location <input type="text" name="file_location" required maxlength="500" placeholder="/files/.../v{{ next_version }}.pdf" style="width:100%"></label>
+    <label>Uploaded at <input type="datetime-local" name="uploaded_at" value="{{ now }}" required></label>
+    <label style="flex:1">Change note (optional) <input type="text" name="change_note" style="width:100%"></label>
+    <button type="submit">Add version</button>
+  </div>
+</form>
+
+<h2>Reviews</h2>
+<table>
+  <tr><th>Review</th><th>Reviewer</th><th>Score</th><th>Recommendation</th><th>Submitted</th></tr>
+  {% for r in reviews %}
+  <tr><td><a href="{{ url_for('review_detail', review_id=r.review_id) }}">#{{ r.review_id }}</a></td>
+      <td>{{ r.reviewer_name }} (#{{ r.reviewer_id }})</td><td>{{ r.overall_score }}</td><td>{{ r.recommendation }}</td><td>{{ r.review_submission_date }}</td></tr>
+  {% else %}<tr><td colspan="5" class="muted">No reviews yet.</td></tr>{% endfor %}
+</table>
+{% endblock %}
