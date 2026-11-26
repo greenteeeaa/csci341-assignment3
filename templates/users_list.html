@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<div class="actions"><a class="button" href="{{ url_for('user_create') }}">+ New user</a></div>
+<table>
+  <tr><th>ID</th><th>Name</th><th>E-mail</th><th>Affiliation</th><th>Country</th><th>Phone</th><th>Roles</th><th></th></tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.user_id }}</td>
+    <td><a href="{{ url_for('user_detail', user_id=u.user_id) }}">{{ u.given_name }} {{ u.surname }}</a></td>
+    <td>{{ u.email }}</td><td>{{ u.affiliation }}</td><td>{{ u.country }}</td><td>{{ u.phone_number }}</td>
+    <td>{% if u.is_author %}<span class="tag">author</span>{% endif %}{% if u.is_reviewer %}<span class="tag">reviewer</span>{% endif %}</td>
+    <td><a href="{{ url_for('user_edit', user_id=u.user_id) }}">edit</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit review #%d'|format(review_id) if review_id else 'New review' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Edit review #%d'|format(review_id) if review_id else 'New review' }}</h1>
+<p class="hint">Only completed reviews are stored. A reviewer cannot review a paper they authored, and may review each paper at most once.</p>
+<form method="post">
+  <label>Paper</label>
+  <select name="paper_id" required>
+    <option value="">— choose a paper —</option>
+    {% for p in papers %}<option value="{{ p.paper_id }}" {% if form.get('paper_id') == p.paper_id|string %}selected{% endif %}>#{{ p.paper_id }} [{{ p.acronym }}, {{ p.status }}] {{ p.title }}</option>{% endfor %}
+  </select>
+  <label>Reviewer</label>
+  <select name="reviewer_id" required>
+    <option value="">— choose a reviewer —</option>
+    {% for r in reviewers %}<option value="{{ r.reviewer_id }}" {% if form.get('reviewer_id') == r.reviewer_id|string %}selected{% endif %}>{{ r.full_name }} (#{{ r.reviewer_id }})</option>{% endfor %}
+  </select>
+  <label>Overall score (1–5)</label>
+  <select name="overall_score">
+    {% for s in range(1, 6) %}<option value="{{ s }}" {% if form.get('overall_score') == s|string %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+  <label>Recommendation</label>
+  <select name="recommendation">
+    {% for r in RECOMMENDATIONS %}<option value="{{ r }}" {% if form.get('recommendation') == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+  </select>
+  <label>Comments for the authors <textarea name="comments_for_authors" required>{{ form.get('comments_for_authors', '') }}</textarea></label>
+  <label>Confidential comments for the organizers <span class="hint">(optional)</span> <textarea name="confidential_comments">{{ form.get('confidential_comments', '') }}</textarea></label>
+  <label>Review submission date <input type="date" name="review_submission_date" value="{{ form.get('review_submission_date', '') }}" required></label>
+  <div class="actions">
+    <button type="submit">Save review</button>
+    <a class="button secondary" href="{{ url_for('review_detail', review_id=review_id) if review_id else url_for('reviews_list') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

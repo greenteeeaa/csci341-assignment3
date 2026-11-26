@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Review #{{ review.review_id }}{% endblock %}
+{% block content %}
+<h1>Review #{{ review.review_id }}</h1>
+<div class="actions">
+  <a class="button" href="{{ url_for('review_edit', review_id=review.review_id) }}">Edit</a>
+  <form class="inline" method="post" action="{{ url_for('review_delete', review_id=review.review_id) }}"
+        onsubmit="return confirm('Delete review #{{ review.review_id }}?');">
+    <button class="danger" type="submit">Delete</button>
+  </form>
+  <a class="button secondary" href="{{ url_for('reviews_list') }}">All reviews</a>
+</div>
+<div class="card">
+  <dl class="kv">
+    <dt>Paper</dt><dd><a href="{{ url_for('paper_detail', paper_id=review.paper_id) }}">#{{ review.paper_id }} {{ review.title }}</a> ({{ review.status }})</dd>
+    <dt>Reviewer</dt><dd><a href="{{ url_for('user_detail', user_id=review.reviewer_id) }}">{{ review.reviewer_name }}</a> (#{{ review.reviewer_id }})</dd>
+    <dt>Overall score</dt><dd>{{ review.overall_score }} / 5</dd>
+    <dt>Recommendation</dt><dd>{{ review.recommendation }}</dd>
+    <dt>Comments for the authors</dt><dd>{{ review.comments_for_authors }}</dd>
+    <dt>Confidential comments</dt><dd>{{ review.confidential_comments|fmt }}</dd>
+    <dt>Submission date</dt><dd>{{ review.review_submission_date }}</dd>
+  </dl>
+</div>
+{% endblock %}
